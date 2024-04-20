@@ -9,6 +9,7 @@ import chroma from 'chroma-js';
 
 
 export const App = () => {
+
   let renderer: Sigma | null = null;
 
   useEffect(() => {
@@ -19,12 +20,14 @@ export const App = () => {
         // Verify if the file exists
         const response = await fetch(url);
         if (!response.ok) {
-          console.log("Aqui")
           throw new Error("ERROR: file not found!");
         }
         
         // Load CSV file
         const csvData = await response.text();
+
+        const textShow = document.getElementById("text") as HTMLElement;
+        textShow.innerText = csvData;
 
         Papa.parse(csvData, {
           header: true,
@@ -32,8 +35,12 @@ export const App = () => {
           dynamicTyping: true,
           complete: (results) => { 
             const graph = new Graph();
+
+            graph.addNode("1", { label: "Node 1", x: 0, y: 0, size: 10, color: "blue" });
+            graph.addNode("2", { label: "Node 2", x: 1, y: 1, size: 20, color: "red" });
+            graph.addEdge("1", "2", { size: 5, color: "purple" });
             
-            // Builf the graph by creating it's nodes and edges
+            // Build the graph by creating it's nodes and edges
             // results.data.forEach((line: any) => {
             //   const author = line.Username;
             //   const isRetweet = line.Retweets >= 1;
@@ -46,16 +53,17 @@ export const App = () => {
             //   }
             // });
             
-            // TESTE 
-            results.data.forEach((line: any) => {
-              const name = line.Name;
-              const friend = line.Friend;
-              // console.log(`Nome: ${name}, Amigo: ${friend}`);
 
-              if (!graph.hasNode(name))         graph.addNode(name, { label: name });
-              if (!graph.hasNode(friend))       graph.addNode(friend, { label: friend });
-              if (!graph.hasEdge(name, friend)) graph.addEdge(name, friend);
-            });
+            // TEST 
+            // results.data.forEach((line: any) => {
+            //   const name = line.Name;
+            //   const friend = line.Friend;
+            //   console.log(`Nome: ${name}, Amigo: ${friend}`);
+
+            //   if (!graph.hasNode(name))         graph.addNode(name, { label: name });
+            //   if (!graph.hasNode(friend))       graph.addNode(friend, { label: friend });
+            //   if (!graph.hasEdge(name, friend)) graph.addEdge(name, friend);
+            // });
 
             // Only keep the main connected component
             cropToLargestConnectedComponent(graph);
@@ -106,12 +114,14 @@ export const App = () => {
     };
 
     fetchData();
+
   }, []); 
 
   return (
     <div>
       <div id="loader">Loading...</div>
       <div id="sigma-container"></div>
+      <div id="text"></div>
     </div>
   );
 }
