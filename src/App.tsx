@@ -11,31 +11,110 @@ import chroma from 'chroma-js';
 export const App = () => {
   let renderer: Sigma | null = null;
 
-  const graph = new Graph();
-  graph.addNode("1", { label: "Node 1", x: 0, y: 0, size: 10, color: "blue" });
-  graph.addNode("2", { label: "Node 2", x: 1, y: 1, size: 20, color: "red" });
-  graph.addEdge("1", "2", { size: 5, color: "purple" });
+  useEffect(() => {
+    const fetchData = async () => {
+      const url = '/data/data.csv';
 
-  //const renderer = new Sigma(
-  //  graph,
-  //  document.getElementById("sigma") as HTMLDivElement
-  //);
+      try {
+        // Verify if the file exists
+        const response = await fetch(url);
+        if (!response.ok) {
+          console.log("Aqui")
+          throw new Error("ERROR: file not found!");
+        }
+        
+        // Load CSV file
+        const csvData = await response.text();
 
-  // Hide the loader from the DOM
-  const loader = document.getElementById("root") as HTMLElement;
-  if (loader) loader.style.display = "none";
+        Papa.parse(csvData, {
+          header: true,
+          delimiter: ",",
+          dynamicTyping: true,
+          complete: (results) => { 
+            const graph = new Graph();
+            
+            // Builf the graph by creating it's nodes and edges
+            // results.data.forEach((line: any) => {
+            //   const author = line.Username;
+            //   const isRetweet = line.Retweets >= 1;
+            //   const retweetedBy = isRetweet ? line['Name'] : null;
 
-  // Draw the final graph using sigma 
-  const container = document.getElementById("sigma") as HTMLElement;
-  if (renderer === null) renderer = new Sigma(graph, container, { allowInvalidContainer: true });
+            //   if (retweetedBy) {
+            //     if (!graph.hasNode(author))             graph.addNode(author, { label: author });
+            //     if (!graph.hasNode(retweetedBy))        graph.addNode(retweetedBy, { label: retweetedBy });
+            //     if(!graph.hasEdge(retweetedBy, author)) graph.addEdge(retweetedBy, author);
+            //   }
+            // });
+            
+            // TESTE 
+            results.data.forEach((line: any) => {
+              const name = line.Name;
+              const friend = line.Friend;
+              // console.log(`Nome: ${name}, Amigo: ${friend}`);
+
+              if (!graph.hasNode(name))         graph.addNode(name, { label: name });
+              if (!graph.hasNode(friend))       graph.addNode(friend, { label: friend });
+              if (!graph.hasEdge(name, friend)) graph.addEdge(name, friend);
+            });
+
+            // Only keep the main connected component
+            cropToLargestConnectedComponent(graph);
+
+            // Use degrees for node sizes
+            const degrees = graph.nodes().map((node) => graph.degree(node));
+            const minDegree = Math.min(...degrees);
+            const maxDegree = Math.max(...degrees);
+            const minSize = 2,
+              maxSize = 15;
+            graph.forEachNode((node) => {
+              const degree = graph.degree(node);
+              graph.setNodeAttribute(
+                node,
+                "size",
+                minSize + ((degree - minDegree) / (maxDegree - minDegree)) * (maxSize - minSize),
+              );
+            });
+
+            // Create a color scale with chroma.js to represent the nodes
+            const scale = chroma.scale(['#91DFEB', '#A29CE6']).domain([minDegree, maxDegree]);
+            
+            // Add colors to the nodes, based it's quantity of edges 
+            graph.forEachNode((node) => {
+              const degree = graph.degree(node);
+              const color = scale(degree).hex();
+              graph.setNodeAttribute(node, 'color', color);
+              // console.log(`Node ${node} - Degree: ${degree} - Color: ${color}`);
+            });
+            
+            // Position nodes on a circle, then run Force Atlas 2 for a while to get proper graph layout
+            circular.assign(graph);
+            const settings = forceAtlas2.inferSettings(graph);
+            forceAtlas2.assign(graph, { settings, iterations: 600 });
+
+            // Hide the loader from the DOM
+            const loader = document.getElementById("loader") as HTMLElement;
+            if (loader) loader.style.display = "none";
+            
+            // Draw the final graph using sigma 
+            const container = document.getElementById("sigma-container") as HTMLElement;
+            if (renderer === null) renderer = new Sigma(graph, container);
+          },
+        });
+      } catch (error) {
+        console.error("ERROR: could not access the file!", error);
+      }
+    };
+
+    fetchData();
+  }, []); 
 
   return (
     <div>
       <div id="loader">Loading...</div>
+      <div id="sigma-container"></div>
     </div>
   );
 }
-
 
 
 
