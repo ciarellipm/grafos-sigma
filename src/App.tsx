@@ -36,9 +36,9 @@ export const App = () => {
           complete: (results) => { 
             const graph = new Graph();
 
-            graph.addNode("1", { label: "Node 1", x: 0, y: 0, size: 10, color: "blue" });
-            graph.addNode("2", { label: "Node 2", x: 1, y: 1, size: 20, color: "red" });
-            graph.addEdge("1", "2", { size: 5, color: "purple" });
+            // graph.addNode("1", { label: "Node 1", x: 0, y: 0, size: 10, color: "blue" });
+            // graph.addNode("2", { label: "Node 2", x: 1, y: 1, size: 20, color: "red" });
+            // graph.addEdge("1", "2", { size: 5, color: "purple" });
             
             // Build the graph by creating it's nodes and edges
             // results.data.forEach((line: any) => {
@@ -55,15 +55,15 @@ export const App = () => {
             
 
             // TEST 
-            // results.data.forEach((line: any) => {
-            //   const name = line.Name;
-            //   const friend = line.Friend;
-            //   console.log(`Nome: ${name}, Amigo: ${friend}`);
+            results.data.forEach((line: any) => {
+              const name = line.Name;
+              const friend = line.Friend;
+              //console.log(`Nome: ${name}, Amigo: ${friend}`);
 
-            //   if (!graph.hasNode(name))         graph.addNode(name, { label: name });
-            //   if (!graph.hasNode(friend))       graph.addNode(friend, { label: friend });
-            //   if (!graph.hasEdge(name, friend)) graph.addEdge(name, friend);
-            // });
+              if (!graph.hasNode(name))         graph.addNode(name, { label: name });
+              if (!graph.hasNode(friend))       graph.addNode(friend, { label: friend });
+              if (!graph.hasEdge(name, friend)) graph.addEdge(name, friend);
+            });
 
             // Only keep the main connected component
             cropToLargestConnectedComponent(graph);
@@ -104,7 +104,7 @@ export const App = () => {
             if (loader) loader.style.display = "none";
             
             // Draw the final graph using sigma 
-            const container = document.getElementById("sigma-container") as HTMLElement;
+            const container = document.getElementById("container") as HTMLElement;
             if (renderer === null) renderer = new Sigma(graph, container);
           },
         });
@@ -114,6 +114,15 @@ export const App = () => {
     };
 
     fetchData();
+
+    // const graph2 = new Graph();
+
+    // graph2.addNode("1", { label: "Node 1", x: 0, y: 0, size: 10, color: "blue" });
+    // graph2.addNode("2", { label: "Node 2", x: 1, y: 1, size: 20, color: "red" });
+    // graph2.addEdge("1", "2", { size: 5, color: "purple" });
+
+    // const container = document.getElementById("sigma-container") as HTMLElement;
+    // renderer = new Sigma(graph2, container,  {allowInvalidContainer: true});
 
   }, []); 
 
