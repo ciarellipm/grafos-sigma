@@ -2,6 +2,21 @@
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
+requirements:
+npx create-react-app grafos-sigma --template typescript
+cd grafos-sigmanpm audit
+npm install graphology sigma
+npm install react-papaparse
+npm install papaparse
+npm install chroma-js
+npm install graphology-components
+npm install graphology-layout-forceatlas2
+npm install graphology-layout
+
+npm i @sigma/node-border
+npm install graphology-layout-force
+npm install graphology-communities-louvain
+
 ## Available Scripts
 
 In the project directory, you can run:
