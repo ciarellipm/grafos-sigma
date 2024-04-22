@@ -4,7 +4,7 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 
 requirements:\
 npx create-react-app grafos-sigma --template typescript\
-cd grafos-sigmanpm audit\
+cd grafos-sigma\
 npm install graphology sigma\
 npm install react-papaparse\
 npm install papaparse\
